@@ -1,12 +1,16 @@
+// This line selects elements with the class "progress-bar" and "progress-text" from the HTML document and assigns it to variables progressBar 
 const progressBar = document.querySelector(".progress-bar"),
+//This line selects elements with the class "progress-text" from the HTML document and assigns it to  progressText.
   progressText = document.querySelector(".progress-text");
 
+//This function is responsible for updating the progress bar and progress text.
 const progress = (value) => {
   const percentage = (value / time) * 100;
   progressBar.style.width = `${percentage}%`;
   progressText.innerHTML = `${value}`;
 };
 
+//Assigning variables from html document to the corresponding variables
 const startBtn = document.querySelector(".start"),
   numQuestions = document.querySelector("#num-questions"),
   category = document.querySelector("#category"),
@@ -14,41 +18,56 @@ const startBtn = document.querySelector(".start"),
   timePerQuestion = document.querySelector("#time"),
   quiz = document.querySelector(".quiz"),
   startScreen = document.querySelector(".start-screen");
-
+//declaring several variables used throughout the script.
+//empty array questions to store quiz questions, 
+//time to store the time per question, 
+//score to store the player's score, 
+//currentQuestion to keep track of the current question, 
+//and timer to store the interval timer used for timing.
 let questions = [],
   time = 30,
   score = 0,
   currentQuestion,
   timer;
 
-const startQuiz = () => {
-  const num = numQuestions.value,
-    cat = category.value,
-    diff = difficulty.value;
-  loadingAnimation();
-  const url = `https://opentdb.com/api.php?amount=${num}&category=${cat}&difficulty=${diff}&type=multiple`;
-  fetch(url)
-    .then((res) => res.json())
-    .then((data) => {
-      questions = data.results;
-      setTimeout(() => {
-        startScreen.classList.add("hide");
-        quiz.classList.remove("hide");
-        currentQuestion = 1;
-        showQuestion(questions[0]);
-      }, 1000);
-    });
-};
+  //This fetches quiz questions from an external API based on the selected options and then displays the quiz interface.
+  // Function to fetch categories from API and populate the dropdown
 
+
+  
+  const startQuiz = () => {
+    const num = numQuestions.value,
+      cat = category.value,
+      diff = difficulty.value;
+    loadingAnimation();
+    //url for api
+    const url = `https://opentdb.com/api.php?amount=${num}&category=${cat}&difficulty=${diff}&type=multiple`;
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        questions = data.results;
+        setTimeout(() => {
+          startScreen.classList.add("hide");
+          quiz.classList.remove("hide");
+          currentQuestion = 1;
+          showQuestion(questions[0]);
+        }, 1000);
+      });
+  };
+//event listner when the user click on the startquiz button
 startBtn.addEventListener("click", startQuiz);
 
+//displays the questions one by one on the screen
 const showQuestion = (question) => {
   const questionText = document.querySelector(".question"),
-    answersWrapper = document.querySelector(".answer-wrapper");
+  answersWrapper = document.querySelector(".answer-wrapper");
   questionNumber = document.querySelector(".number");
 
   questionText.innerHTML = question.question;
 
+  // Combines incorrect and correct answers into an array, 
+  //converts the correct answer to a string, and stores it in the answers array.
+  
   const answers = [
     ...question.incorrect_answers,
     question.correct_answer.toString(),
@@ -56,7 +75,7 @@ const showQuestion = (question) => {
   answersWrapper.innerHTML = "";
   answers.sort(() => Math.random() - 0.5);
   answers.forEach((answer) => {
-    answersWrapper.innerHTML += `
+  answersWrapper.innerHTML += `
                   <div class="answer ">
             <span class="text">${answer}</span>
             <span class="checkbox">
@@ -87,7 +106,7 @@ const showQuestion = (question) => {
   time = timePerQuestion.value;
   startTimer(time);
 };
-
+//if the time reaches 3 seconds then the beep sound starts playing.
 const startTimer = (time) => {
   timer = setInterval(() => {
     if (time === 3) {
@@ -115,7 +134,7 @@ const loadingAnimation = () => {
 function defineProperty() {
   var osccred = document.createElement("div");
   osccred.innerHTML =
-    "A Project By <a href='https://www.youtube.com/@opensourcecoding' target=_blank>Open Source Coding</a>";
+    "A Project By Kshtitij Rajput' target=_blank></a>";
   osccred.style.position = "absolute";
   osccred.style.bottom = "0";
   osccred.style.right = "0";
@@ -138,6 +157,7 @@ submitBtn.addEventListener("click", () => {
   checkAnswer();
 });
 
+//
 nextBtn.addEventListener("click", () => {
   nextQuestion();
   submitBtn.style.display = "block";
@@ -215,3 +235,48 @@ const playAdudio = (src) => {
   const audio = new Audio(src);
   audio.play();
 };
+
+
+// Function to save data in browser cookies
+const saveDataToCookies = () => {
+  document.cookie = `currentQuestion=${currentQuestion}; expires=Thu, 18 Dec 2025 12:00:00 UTC`;
+  document.cookie = `score=${score}; expires=Thu, 18 Dec 2025 12:00:00 UTC`;
+  document.cookie = `time=${time}; expires=Thu, 18 Dec 2025 12:00:00 UTC`;
+};
+
+// Function to load data from browser cookies
+const loadDataFromCookies = () => {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    switch (name) {
+      case 'currentQuestion':
+        currentQuestion = parseInt(value);
+        break;
+      case 'score':
+        score = parseInt(value);
+        break;
+      case 'time':
+        time = parseInt(value);
+        break;
+    }
+  }
+};
+
+// Load data when the script starts
+loadDataFromCookies();
+
+// Save data before the page is unloaded
+window.addEventListener('beforeunload', saveDataToCookies);
+
+// Clear data from cookies when the restart button is clicked
+const clearDataFromCookies = () => {
+  document.cookie = 'currentQuestion=; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+  document.cookie = 'score=; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+  document.cookie = 'time=; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+};
+
+restartBtn.addEventListener("click", () => {
+  clearDataFromCookies();
+  window.location.reload();
+});
