@@ -16,11 +16,11 @@ body {
 .container {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 1300px;
   background: #1f2847;
   padding: 30px;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 2px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
